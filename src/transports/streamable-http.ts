@@ -253,6 +253,13 @@ export class StreamableHttpServer extends BaseTransportServer {
       res.status(204).send()
     })
 
+    // Return 405 for non-GET requests to /sse so clients (e.g. Home Assistant)
+    // that probe with POST for Streamable HTTP know to fall back to SSE GET
+    this.app.post("/sse", (_req: Request, res: Response) => {
+      res.setHeader("Allow", "GET")
+      res.status(405).json({ error: "Method Not Allowed. Use GET for SSE transport." })
+    })
+
     // Legacy SSE transport endpoints for backwards compatibility (e.g. Home Assistant)
     this.app.get("/sse", async (_req: Request, res: Response) => {
       console.error("Received GET request to /sse (legacy SSE transport)")
