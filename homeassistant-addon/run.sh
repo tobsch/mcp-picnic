@@ -10,4 +10,4 @@ export HTTP_PORT=3000
 export HTTP_HOST=0.0.0.0
 export ENABLE_HTTP_SERVER=true
 
-exec node /usr/local/lib/node_modules/mcp-picnic/bin/mcp-server.js
+exec node /app/bin/mcp-server.js
