@@ -439,6 +439,30 @@ Add to your Continue configuration:
 
 **Note**: Set `PICNIC_COUNTRY_CODE` to `"DE"` if your account is registered in Germany.
 
+### Home Assistant Add-on
+
+You can run MCP Picnic as a Home Assistant add-on, enabling HA's built-in conversation agents (or any MCP-compatible integration) to interact with Picnic.
+
+**Installation:**
+
+1. In Home Assistant, go to **Settings > Add-ons > Add-on Store**
+2. Click the three-dot menu (top right) and select **Repositories**
+3. Add the repository URL: `https://github.com/tobsch/mcp-picnic`
+4. Find **MCP Picnic** in the store and click **Install**
+5. In the add-on **Configuration** tab, enter your Picnic credentials:
+   - `picnic_username`: Your Picnic email
+   - `picnic_password`: Your Picnic password
+   - `picnic_country_code`: `NL` or `DE`
+6. **Start** the add-on
+
+**Connecting to Home Assistant MCP integration:**
+
+1. Go to **Settings > Devices & Services > Add Integration**
+2. Search for **MCP** (Model Context Protocol)
+3. Enter the URL: `http://homeassistant.local:3000/mcp`
+
+The add-on exposes both the Streamable HTTP transport (`/mcp`) and legacy SSE transport (`/sse`) on port 3000.
+
 ## Authentication
 
 The server uses the credentials configured in your environment variables:
