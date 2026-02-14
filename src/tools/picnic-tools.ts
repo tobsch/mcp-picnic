@@ -85,6 +85,32 @@ const searchInputSchema = z.object({
     .describe("Number of results to skip for pagination (default: 0)"),
 })
 
+// Deep recursive search for sellingUnit nodes — handles both NL and DE response structures.
+// The upstream picnic-api library only traverses `children` arrays, but the DE API nests
+// products inside extra `child` wrappers (STATE_BOUNDARY, SUSPENSE, etc.) that get skipped.
+function findSellingUnits(node: unknown, depth = 0): Record<string, unknown>[] {
+  if (!node || typeof node !== "object" || depth > 20) return []
+  const n = node as Record<string, unknown>
+  const results: Record<string, unknown>[] = []
+  if (
+    n.content &&
+    typeof n.content === "object" &&
+    (n.content as Record<string, unknown>).sellingUnit
+  ) {
+    results.push((n.content as Record<string, unknown>).sellingUnit as Record<string, unknown>)
+  }
+  if (Array.isArray(n.children)) {
+    for (const c of n.children) results.push(...findSellingUnits(c, depth + 1))
+  }
+  if (n.child && typeof n.child === "object") {
+    results.push(...findSellingUnits(n.child, depth + 1))
+  }
+  if (n.body && typeof n.body === "object") {
+    results.push(...findSellingUnits(n.body, depth + 1))
+  }
+  return results
+}
+
 toolRegistry.register({
   name: "picnic_search",
   description: "Search for products in Picnic with pagination and filtered results",
@@ -92,7 +118,15 @@ toolRegistry.register({
   handler: async (args) => {
     await ensureClientInitialized()
     const client = getPicnicClient()
-    const allResults = await client.search(args.query)
+
+    // Use raw API call + deep traversal to support both NL and DE response structures
+    const rawResults = await (client as any).sendRequest(
+      "GET",
+      `/pages/search-page-results?search_term=${encodeURIComponent(args.query)}`,
+      null,
+      true,
+    )
+    const allResults = findSellingUnits(rawResults)
 
     // Apply pagination
     const startIndex = args.offset || 0
