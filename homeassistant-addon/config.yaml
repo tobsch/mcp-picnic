@@ -1,5 +1,5 @@
 name: "MCP Picnic"
-version: "1.0.3"
+version: "1.0.4"
 slug: mcp_picnic
 description: "MCP server for Picnic grocery delivery - AI-powered grocery shopping"
 url: "https://github.com/ivo-toby/mcp-picnic"

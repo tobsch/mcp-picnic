@@ -12,6 +12,12 @@ import { getPicnicClient, initializePicnicClient } from "../utils/picnic-client.
  * - Default limits set to reasonable values (10 for search, 10 for deliveries)
  */
 
+// Helper to format price from cents (integer) to euro string, e.g. 405 → "4.05"
+function formatPrice(cents: unknown): string | unknown {
+  if (typeof cents !== "number") return cents
+  return (cents / 100).toFixed(2)
+}
+
 // Helper function to ensure client is initialized
 async function ensureClientInitialized() {
   try {
@@ -52,7 +58,7 @@ function filterCartData(cart: unknown) {
     return {
       id: itemObj.id,
       name: itemObj.name,
-      price: itemObj.display_price || itemObj.price,
+      price: formatPrice(itemObj.display_price || itemObj.price),
       unit: itemObj.unit_quantity,
       quantity: itemObj.count,
     }
@@ -63,9 +69,9 @@ function filterCartData(cart: unknown) {
     id: cartObj.id,
     items: filteredItems,
     total_count: cartObj.total_count,
-    total_price: cartObj.total_price,
-    checkout_total_price: cartObj.checkout_total_price,
-    total_savings: cartObj.total_savings,
+    total_price: formatPrice(cartObj.total_price),
+    checkout_total_price: formatPrice(cartObj.checkout_total_price),
+    total_savings: formatPrice(cartObj.total_savings),
   }
 }
 
@@ -137,7 +143,7 @@ toolRegistry.register({
     const filteredResults = paginatedResults.map((product) => ({
       id: product.id,
       name: product.name,
-      price: product.display_price,
+      price: formatPrice(product.display_price),
       unit: product.unit_quantity,
       // Only include image_id if it exists, for potential image retrieval
       ...(product.image_id && { image_id: product.image_id }),
@@ -379,7 +385,7 @@ toolRegistry.register({
               id: item.id,
               name: item.name,
               type: item.type,
-              price: item.display_price,
+              price: formatPrice(item.display_price),
               unit: item.unit_quantity,
               ...(args.includeImages && item.image_id && { image_id: item.image_id }),
             }
